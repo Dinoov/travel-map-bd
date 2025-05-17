@@ -1,0 +1,339 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+  background-color: #003B46;
+  display: flex;
+  flex-direction: column;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 300;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+body a {
+  font-size: 40px;
+  color: white; 
+  text-decoration: none; 
+  cursor: pointer;
+  transition: opacity 500ms ease; 
+}
+
+body a:hover{
+  opacity: 0.5;
+ }
+
+ body p {
+  font-size: 20px;
+  color: white; 
+  padding: 0px 0px 20px 0px;
+}
+
+ h1 {
+  text-align: center;
+  color: #ffffff;
+}
+
+#map {
+  height: 500px;
+  width: 1240px;
+  border-radius: 20px;
+  margin: 0 auto; 
+}
+
+.head {
+  background-color: #66A5AD;
+  height: 135px;
+  width: 1440px;
+  margin: 30px 0px 30px 0;
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-around; 
+  align-items: center;
+}
+
+.head h1 {
+  font-size: 60px;
+}
+
+.head a {
+  font-size: 40px;
+  color: white; 
+  text-decoration: none; 
+  cursor: pointer;
+  transition: opacity 500ms ease;
+}
+
+.head a:hover{
+  opacity: 0.5;
+ }
+
+.head img {
+  height: 100px;
+  width: 100px;
+}
+
+.desc{
+  width: 1440px;
+}
+
+body p1 {
+  line-height: 2; 
+  font-size: 20px;
+  color: white; 
+  padding: 0px 0px 20px 0px;
+}
+
+/*----------------------*/
+
+.popup-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: "Montserrat", sans-serif;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border: 2px solid #66A5AD;
+  border-radius: 10px;
+}
+
+.popup-form label {
+  font-weight: bold;
+  color: #003B46;
+  margin-bottom: 5px;
+}
+
+.popup-form input,
+.popup-form textarea {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: inherit;
+  resize: none;  
+  overflow-wrap: break-word; 
+}
+
+.popup-form textarea {
+  min-height: 100px;
+  max-height: 150px;  
+}
+
+.popup-form button {
+  background-color: #66A5AD;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.popup-form button:hover {
+  background-color: #003B46;
+}
+
+/*----------------------*/
+
+.marker-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: "Montserrat", sans-serif;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border: 2px solid #66A5AD;
+  border-radius: 10px;
+}
+
+.marker-popup b {
+  color: #003B46;
+}
+
+.marker-popup p {
+  color: #003B46;
+  margin: 5px 0;
+}
+
+.marker-popup button {
+  background-color: #66A5AD;
+  color: white;
+  padding: 5px 10px;
+  margin: 2px 0px 2px 0px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.marker-popup button:hover {
+  background-color: #003B46;
+}
+
+/*---------------*/
+
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1000; 
+  left: 0; 
+  top: 0; 
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgba(0, 0, 0, 0.5); 
+}
+
+.modal-content {
+  position: relative; 
+  background-color: #fff; 
+  margin: 15% auto; 
+  padding: 20px; 
+  border: 1px solid #888; 
+  width: 80%; 
+  max-width: 500px; 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+  border-radius: 15px; /* Закругленные края */
+  text-align: center;
+}
+
+.close {
+  position: absolute; 
+  top: 10px; 
+  right: 10px; 
+  color: #aaa; 
+  font-size: 24px; 
+  cursor: pointer; 
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+form input {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  box-sizing: border-box;
+  border: 1px solid #003B46;  
+  border-radius: 10px;        
+  background-color: rgba(255, 255, 255, 0.8);  
+}
+
+form button {
+  margin: 10px 5px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form button:hover {
+  background-color: #66A5AD;
+  color: white;
+}
+
+#registerBtn {
+  background-color: #66A5AD;
+  color: white;
+}
+
+#registerBtn:hover {
+  background-color: #003B46;
+  color: white;
+}
+
+
+/*-----------------------------------*/
+
+/*----------------------*/
+
+/*----------------------*/
+
+.description {
+  background-color: #66A5AD;
+  width: 1440px;
+  margin: 30px 0px;
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-between; /* Расположить элементы по строке */
+  align-items: center;
+  padding: 15px;
+  flex-wrap: wrap; /* Позволяет полям переноситься на новую строку на маленьких экранах */
+}
+
+.description form {
+  display: flex;
+  flex-direction: row; /* Расположить элементы в строку */
+  justify-content: space-between; /* Равномерное распределение элементов */
+  width: 100%;
+  flex-wrap: wrap; /* Позволяет элементам переноситься на новую строку, если необходимо */
+}
+
+.description label {
+  font-weight: bold;
+  color: #003B46;
+  margin-right: 10px;
+  font-size: 14px; /* Чтобы текст не был слишком крупным */
+  display: flex;
+  align-items: center; /* Центрирование текста по вертикали */
+}
+
+.description input,
+.description textarea,
+.description select {
+  width: 180px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: inherit;
+  resize: none;
+  overflow-wrap: break-word;
+}
+
+.description textarea {
+  min-height: 20px;
+  max-height: 100px;
+}
+
+.description button {
+  background-color: #66A5AD;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 10px;
+}
+
+.description button:hover {
+  background-color: #003B46;
+}
+
+
+.description .popup-form,
+.description .marker-popup {
+  width: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+
+
+.marker-popup .category {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: #333;
+}
+
+

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Мапа подорожей</title>
+
+  <!-- Шрифти -->
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+  <!-- Власні стилі -->
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="head">
+      <img src="pictures/free-icon-location-pin-5428978-removebg-preview.png" alt="Location Pin" />
+      <h1>INTERACTIVE TRAVEL MAP</h1>
+      <a href="#" id="clear">Видалити <br />мітки</a>
+    </div>
+  </header>
+
+  <main>
+    <div id="map"></div>
+
+    <div class="description">
+      <form id="markerForm">
+        <label for="title">Заголовок:</label>
+        <textarea id="title" name="title" required></textarea><br /><br />
+
+        <label for="description">Опис:</label>
+        <textarea id="description" name="description" required></textarea><br /><br />
+
+        <label for="category">Категорія:</label>
+        <select id="category" name="category">
+          <option value="nature">Природа</option>
+          <option value="architecture">Архітектура</option>
+          <option value="other">Інше</option>
+        </select><br /><br />
+
+        <!-- Приховані поля для координат -->
+        <input type="hidden" id="latitude" name="latitude" />
+        <input type="hidden" id="longitude" name="longitude" />
+
+        <button type="submit">Зберегти</button>
+      </form>
+    </div>
+
+    <p>Для додавання точки на карту, натисніть на потрібне місце, заповніть колонку з заголовком та описом.</p>
+  </main>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <!-- Скрипт додатку -->
+  <script src="js/app.js"></script>
+</body>
+</html>
