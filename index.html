@@ -20,7 +20,7 @@
     <div class="head">
       <img src="pictures/free-icon-location-pin-5428978-removebg-preview.png" alt="Location Pin" />
       <h1>INTERACTIVE TRAVEL MAP</h1>
-      <a href="#" id="clear">Видалити <br />мітки</a>
+      <a href="#" id="clear">Delete <br />markers</a>
     </div>
   </header>
 
@@ -29,28 +29,28 @@
 
     <div class="description">
       <form id="markerForm">
-        <label for="title">Заголовок:</label>
+        <label for="title">Title:</label>
         <textarea id="title" name="title" required></textarea><br /><br />
 
-        <label for="description">Опис:</label>
+        <label for="description">Description:</label>
         <textarea id="description" name="description" required></textarea><br /><br />
 
-        <label for="category">Категорія:</label>
+        <label for="category">Category:</label>
         <select id="category" name="category">
-          <option value="nature">Природа</option>
-          <option value="architecture">Архітектура</option>
-          <option value="other">Інше</option>
+          <option value="nature">Nature</option>
+          <option value="architecture">Nrchitecture</option>
+          <option value="other">Other</option>
         </select><br /><br />
 
         <!-- Приховані поля для координат -->
         <input type="hidden" id="latitude" name="latitude" />
         <input type="hidden" id="longitude" name="longitude" />
 
-        <button type="submit">Зберегти</button>
+        <button type="submit">Save</button>
       </form>
     </div>
 
-    <p>Для додавання точки на карту, натисніть на потрібне місце, заповніть колонку з заголовком та описом.</p>
+    <p>Click on the desired location, fill in the column with the title and description.</p>
   </main>
 
   <!-- Leaflet JS -->

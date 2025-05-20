@@ -1,36 +1,45 @@
-// Ініціалізація мапи
-const map = L.map('map').setView([51.505, -0.09], 13);
+// Инициализация карты
+const map = L.map('map').setView([48.3794, 31.1656], 6);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  attribution:
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 }).addTo(map);
 
-// Змінні координат
+// Координаты и временный маркер
 let lat, lng;
+let draftMarker = null;
 
-// Масив для зберігання маркерів на карті
+// Список постоянных маркеров
 let markers = [];
 
-// Завантаження міток
+/* ---------- ЗАГРУЗКА МАРКЕРОВ ---------- */
 async function loadMarkers() {
   try {
-    const response = await fetch('http://localhost:5000/api/locations');
-    const locations = await response.json();
+    const res = await fetch('http://localhost:5000/api/locations');
+    const locations = await res.json();
 
-    locations.forEach(loc => {
+    // Удаляем старые
+    markers.forEach(({ marker }) => map.removeLayer(marker));
+    markers = [];
+
+    // Добавляем новые
+    locations.forEach((loc) => {
       const marker = L.marker([loc.coordinates.lat, loc.coordinates.lng]).addTo(map);
-      marker.bindPopup(`
+      marker.bindPopup(
+        `
         <div class="marker-popup">
           <b>${loc.name}</b>
           <p>${loc.description}</p>
           <span class="category">${loc.category}</span>
-          <button class="edit-btn" onclick="editMarker('${loc._id}', '${loc.name}', '${loc.description}', '${loc.category}', ${loc.coordinates.lat}, ${loc.coordinates.lng})">Редагувати</button>
-          <button class="delete-btn" onclick="deleteMarker('${loc._id}', this)">Видалити</button>
+          <button class="edit-btn" onclick="editMarker('${loc._id}', '${loc.name}', '${loc.description}', '${loc.category}', ${loc.coordinates.lat}, ${loc.coordinates.lng})">Edit</button>
+          <button class="delete-btn" onclick="deleteMarker('${loc._id}')">Delete</button>
         </div>
-      `, { className: 'leaflet-custom-popup' });
+        `,
+        { className: 'leaflet-custom-popup' },
+      );
 
-      // Зберігаємо маркер в масив
-      markers.push({ id: loc._id, marker: marker });
+      markers.push({ id: loc._id, marker });
     });
   } catch (error) {
     console.error('Помилка завантаження міток:', error);
@@ -39,34 +48,57 @@ async function loadMarkers() {
 
 loadMarkers();
 
-// Клік по карті — попередній маркер
-map.on('click', function(e) {
+/* ---------- КЛИК ПО КАРТЕ ---------- */
+map.on('click', (e) => {
   lat = e.latlng.lat;
   lng = e.latlng.lng;
 
-  L.marker([lat, lng]).addTo(map)
-    .bindPopup(`
-      <div class="marker-popup">
-        <b>Нова мітка</b>
-        <p>Мітка на цьому місці</p>
-      </div>
-    `, { className: 'leaflet-custom-popup' })
-    .openPopup();
+  // Координаты в скрытые поля
+  document.getElementById('latitude').value = lat;
+  document.getElementById('longitude').value = lng;
+
+  // Удаляем предыдущий draft‑маркер, если был
+  if (draftMarker) map.removeLayer(draftMarker);
+
+  // Создаём новый черновик‑маркер
+  draftMarker = L.marker([lat, lng], { opacity: 0.6 }).addTo(map);
+  draftMarker.bindPopup(
+    `
+    <div class="marker-popup">
+      <b>Marker here</b><br />
+      Click "Save" to add<br />
+    </div>
+    `,
+    { className: 'leaflet-custom-popup' },
+  ).openPopup();
+
+  // При закрытии попапа удаляем draft-маркер
+  draftMarker.on('popupclose', () => {
+    removeDraft();
+  });
 });
 
-// Видалення мітки
-async function deleteMarker(id, button) {
-  try {
-    const response = await fetch(`http://localhost:5000/api/locations/${id}`, {
-      method: 'DELETE',
-    });
+/* ---------- УДАЛЕНИЕ draft ---------- */
+function removeDraft() {
+  if (draftMarker) {
+    map.removeLayer(draftMarker);
+    draftMarker = null;
+    lat = lng = null;
+    document.getElementById('latitude').value = '';
+    document.getElementById('longitude').value = '';
+  }
+}
 
-    if (response.ok) {
-      // Видаляємо маркер з карти
-      const marker = markers.find(m => m.id === id);
-      if (marker) {
-        map.removeLayer(marker.marker);
-        markers = markers.filter(m => m.id !== id); // Видаляємо з масиву
+/* ---------- УДАЛЕНИЕ ПОСТОЯННОГО МАРКЕРА ---------- */
+async function deleteMarker(id) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/locations/${id}`, { method: 'DELETE' });
+
+    if (res.ok) {
+      const obj = markers.find((m) => m.id === id);
+      if (obj) {
+        map.removeLayer(obj.marker);
+        markers = markers.filter((m) => m.id !== id);
       }
       alert('Мітку успішно видалено!');
     } else {
@@ -78,82 +110,102 @@ async function deleteMarker(id, button) {
   }
 }
 
-// Оновлення мітки
-async function editMarker(id, name, description, category, lat, lng) {
-  // Вставляємо дані в форму
+/* ---------- РЕДАКТИРОВАНИЕ ---------- */
+function editMarker(id, name, description, category, latSel, lngSel) {
   document.getElementById('title').value = name;
   document.getElementById('description').value = description;
   document.getElementById('category').value = category;
 
-  // Зберігаємо id мітки
   document.getElementById('markerForm').dataset.id = id;
-  document.getElementById('markerForm').dataset.lat = lat;
-  document.getElementById('markerForm').dataset.lng = lng;
+  lat = latSel;
+  lng = lngSel;
 
-  // Логування для перевірки
-  console.log(`Editing marker: ${id}, ${name}`);
+  // Показать черновик‑маркер в новой позиции
+  if (draftMarker) map.removeLayer(draftMarker);
+  draftMarker = L.marker([lat, lng], { opacity: 0.6 }).addTo(map);
+
+  draftMarker.bindPopup(
+    `
+    <div class="marker-popup">
+      <b>Редагування маркера</b><br />
+      Натисніть «Зберегти» для оновлення<br />
+    </div>
+    `,
+    { className: 'leaflet-custom-popup' },
+  ).openPopup();
+
+  draftMarker.on('popupclose', () => {
+    removeDraft();
+  });
 }
-// Відправка нової мітки
-document.getElementById('markerForm').addEventListener('submit', async function(e) {
+
+/* ---------- СОХРАНЕНИЕ ---------- */
+document.getElementById('markerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const title = document.getElementById('title').value;
-  const description = document.getElementById('description').value;
-  const category = document.getElementById('category').value;
+  if (lat == null || lng == null) {
+    alert('Спочатку оберіть точку на карті');
+    return;
+  }
 
-  const newLocation = {
-    name: title,
-    description: description,
-    category: category,
-    lat: lat,
-    lng: lng,
+  const payload = {
+    name: document.getElementById('title').value,
+    description: document.getElementById('description').value,
+    category: document.getElementById('category').value,
+    lat,
+    lng,
   };
 
   const form = document.getElementById('markerForm');
-  const locationId = form.dataset.id; // Отримуємо id для редагування
+  const id = form.dataset.id;
+  const url = id ? `http://localhost:5000/api/locations/${id}` : 'http://localhost:5000/api/locations';
+  const method = id ? 'PUT' : 'POST';
 
   try {
-    let response;
-    if (locationId) {
-      // Редагування мітки
-      response = await fetch(`http://localhost:5000/api/locations/${locationId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newLocation),
-      });
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-      if (response.ok) {
-        // Оновлюємо мітку на карті
-        const marker = markers.find(m => m.id === locationId);
-        if (marker) {
-          marker.marker.setLatLng([newLocation.lat, newLocation.lng]);
-          marker.marker.getPopup().setContent(`
-            <div class="marker-popup">
-              <b>${newLocation.name}</b>
-              <p>${newLocation.description}</p>
-              <span class="category">${newLocation.category}</span>
-              <button class="edit-btn" onclick="editMarker('${locationId}', '${newLocation.name}', '${newLocation.description}', '${newLocation.category}', ${newLocation.lat}, ${newLocation.lng})">Редагувати</button>
-              <button class="delete-btn" onclick="deleteMarker('${locationId}', this)">Видалити</button>
-            </div>
-          `);
-        }
-      }
-    } else {
-      // Додавання нової мітки
-      response = await fetch('http://localhost:5000/api/locations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newLocation),
-      });
-    }
+    if (res.ok) {
+      alert(id ? 'Мітку успішно оновлено!' : 'Мітку успішно додано!');
+      form.reset();
+      delete form.dataset.id;
+      lat = lng = null;
 
-    if (response.ok) {
-      alert(locationId ? 'Мітку успішно оновлено!' : 'Мітку успішно додано!');
-      loadMarkers(); // Перезавантажуємо мітки після операції
-      form.reset(); // Очищаємо форму
-      delete form.dataset.id; // Видаляємо id після збереження
+      // Убираем draft‑маркер
+      removeDraft();
+
+      // Перезагружаем постоянные метки
+      loadMarkers();
     } else {
       alert('Помилка при додаванні або редагуванні мітки');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Помилка серверу');
+  }
+});
+
+// Видалення всіх маркерів
+document.getElementById('clear').addEventListener('click', async (e) => {
+  e.preventDefault();
+
+  if (!confirm('Ви впевнені, що хочете видалити всі мітки?')) return;
+
+  try {
+    const res = await fetch('http://localhost:5000/api/locations', {
+      method: 'DELETE'
+    });
+
+    if (res.ok) {
+      alert('Усі мітки успішно видалено!');
+      // Очищаємо мапу
+      markers.forEach(({ marker }) => map.removeLayer(marker));
+      markers = [];
+    } else {
+      alert('Помилка при видаленні міток');
     }
   } catch (error) {
     console.error('Error:', error);
