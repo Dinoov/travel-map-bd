@@ -1,150 +1,119 @@
-// Инициализация карты
+// Ініціалізація карти Leaflet з центром на Україну, масштаб 6
 const map = L.map('map').setView([48.3794, 31.1656], 6);
 
+// Додавання OpenStreetMap тайлів на карту з атрибуцією
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution:
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  attribution: '&copy; OpenStreetMap contributors',
 }).addTo(map);
 
-// Координаты и временный маркер
-let lat, lng;
-let draftMarker = null;
+let lat, lng;              // Змінні для координат маркера
+let draftMarker = null;    // Тимчасовий маркер для додавання/редагування
+let markers = [];          // Масив для збереження всіх маркерів
 
-// Список постоянных маркеров
-let markers = [];
-
-/* ---------- ЗАГРУЗКА МАРКЕРОВ ---------- */
+// Функція завантаження маркерів з сервера
 async function loadMarkers() {
   try {
-    const res = await fetch('http://localhost:5000/api/locations');
+    const res = await fetch('http://localhost:5000/api/locations');  // Запит на бекенд
     const locations = await res.json();
 
-    // Удаляем старые
+    // Видалити всі старі маркери з карти
     markers.forEach(({ marker }) => map.removeLayer(marker));
     markers = [];
 
-    // Добавляем новые
+    // Додати кожен маркер з отриманих даних на карту
     locations.forEach((loc) => {
       const marker = L.marker([loc.coordinates.lat, loc.coordinates.lng]).addTo(map);
-      marker.bindPopup(
-        `
+      // Прив’язка спливаючого вікна з інформацією, кнопками редагування та видалення
+      marker.bindPopup(`
         <div class="marker-popup">
           <b>${loc.name}</b>
           <p>${loc.description}</p>
           <span class="category">${loc.category}</span>
-          <button class="edit-btn" onclick="editMarker('${loc._id}', '${loc.name}', '${loc.description}', '${loc.category}', ${loc.coordinates.lat}, ${loc.coordinates.lng})">Edit</button>
-          <button class="delete-btn" onclick="deleteMarker('${loc._id}')">Delete</button>
+          <button onclick="editMarker('${loc._id}', '${loc.name}', '${loc.description}', '${loc.category}', ${loc.coordinates.lat}, ${loc.coordinates.lng})">Edit</button>
+          <button onclick="deleteMarker('${loc._id}')">Delete</button>
         </div>
-        `,
-        { className: 'leaflet-custom-popup' },
-      );
-
+      `);
       markers.push({ id: loc._id, marker });
     });
   } catch (error) {
-    console.error('Помилка завантаження міток:', error);
+    console.error('Error loading markers:', error);
   }
 }
-
 loadMarkers();
 
-/* ---------- КЛИК ПО КАРТЕ ---------- */
+// Обробник кліку на карту - створює чернетку маркера в місці кліку
 map.on('click', (e) => {
   lat = e.latlng.lat;
   lng = e.latlng.lng;
 
-  // Координаты в скрытые поля
-  document.getElementById('latitude').value = lat;
-  document.getElementById('longitude').value = lng;
-
-  // Удаляем предыдущий draft‑маркер, если был
   if (draftMarker) map.removeLayer(draftMarker);
 
-  // Создаём новый черновик‑маркер
-  draftMarker = L.marker([lat, lng], { opacity: 0.6 }).addTo(map);
-  draftMarker.bindPopup(
-    `
+  draftMarker = L.marker([lat, lng], { opacity: 0.6 }).addTo(map).bindPopup(`
     <div class="marker-popup">
-      <b>Marker here</b><br />
-      Click "Save" to add<br />
+      <b>New marker</b><br />
+      Fill out the form and click "Save".
     </div>
-    `,
-    { className: 'leaflet-custom-popup' },
-  ).openPopup();
+  `).openPopup();
 
-  // При закрытии попапа удаляем draft-маркер
-  draftMarker.on('popupclose', () => {
-    removeDraft();
-  });
+  draftMarker.on('popupclose', () => removeDraft());
 });
 
-/* ---------- УДАЛЕНИЕ draft ---------- */
+// Функція видалення чернетки маркера з карти
 function removeDraft() {
   if (draftMarker) {
     map.removeLayer(draftMarker);
     draftMarker = null;
     lat = lng = null;
-    document.getElementById('latitude').value = '';
-    document.getElementById('longitude').value = '';
   }
 }
 
-/* ---------- УДАЛЕНИЕ ПОСТОЯННОГО МАРКЕРА ---------- */
+// Функція видалення маркера за ID
 async function deleteMarker(id) {
   try {
     const res = await fetch(`http://localhost:5000/api/locations/${id}`, { method: 'DELETE' });
-
     if (res.ok) {
+      // Знайти маркер у масиві, видалити з карти і оновити масив
       const obj = markers.find((m) => m.id === id);
       if (obj) {
         map.removeLayer(obj.marker);
         markers = markers.filter((m) => m.id !== id);
       }
-      alert('Мітку успішно видалено!');
+      alert('Marker deleted');
     } else {
-      alert('Помилка при видаленні мітки');
+      alert('Error deleting marker');
     }
   } catch (error) {
-    console.error('Error:', error);
-    alert('Помилка серверу');
+    console.error('Server error:', error);
+    alert('Server error');
   }
 }
 
-/* ---------- РЕДАКТИРОВАНИЕ ---------- */
+// Функція редагування маркера: заповнює форму, додає маркер "чернетку" на карту
 function editMarker(id, name, description, category, latSel, lngSel) {
   document.getElementById('title').value = name;
   document.getElementById('description').value = description;
   document.getElementById('category').value = category;
 
-  document.getElementById('markerForm').dataset.id = id;
+  document.getElementById('markerForm').dataset.id = id;  // Збереження ID для PUT-запиту
   lat = latSel;
   lng = lngSel;
 
-  // Показать черновик‑маркер в новой позиции
   if (draftMarker) map.removeLayer(draftMarker);
-  draftMarker = L.marker([lat, lng], { opacity: 0.6 }).addTo(map);
-
-  draftMarker.bindPopup(
-    `
+  draftMarker = L.marker([lat, lng], { opacity: 0.6 }).addTo(map).bindPopup(`
     <div class="marker-popup">
-      <b>Редагування маркера</b><br />
-      Натисніть «Зберегти» для оновлення<br />
+      <b>Editing marker</b>
     </div>
-    `,
-    { className: 'leaflet-custom-popup' },
-  ).openPopup();
+  `).openPopup();
 
-  draftMarker.on('popupclose', () => {
-    removeDraft();
-  });
+  draftMarker.on('popupclose', () => removeDraft());
 }
 
-/* ---------- СОХРАНЕНИЕ ---------- */
+// Обробник відправлення форми збереження маркера (створення або редагування)
 document.getElementById('markerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   if (lat == null || lng == null) {
-    alert('Спочатку оберіть точку на карті');
+    alert('Please select a point on the map first');
     return;
   }
 
@@ -169,46 +138,38 @@ document.getElementById('markerForm').addEventListener('submit', async (e) => {
     });
 
     if (res.ok) {
-      alert(id ? 'Мітку успішно оновлено!' : 'Мітку успішно додано!');
+      alert(id ? 'Marker updated' : 'Marker added');
       form.reset();
       delete form.dataset.id;
-      lat = lng = null;
-
-      // Убираем draft‑маркер
       removeDraft();
-
-      // Перезагружаем постоянные метки
-      loadMarkers();
+      loadMarkers();  // Оновити маркери на карті після зміни
     } else {
-      alert('Помилка при додаванні або редагуванні мітки');
+      alert('Error saving marker');
     }
   } catch (error) {
-    console.error('Error:', error);
-    alert('Помилка серверу');
+    console.error('Server error:', error);
+    alert('Server error');
   }
 });
 
-// Видалення всіх маркерів
+// Обробник кнопки для видалення всіх маркерів
 document.getElementById('clear').addEventListener('click', async (e) => {
   e.preventDefault();
 
-  if (!confirm('Ви впевнені, що хочете видалити всі мітки?')) return;
+  if (!confirm('Delete all markers?')) return;
 
   try {
-    const res = await fetch('http://localhost:5000/api/locations', {
-      method: 'DELETE'
-    });
+    const res = await fetch('http://localhost:5000/api/locations', { method: 'DELETE' });
 
     if (res.ok) {
-      alert('Усі мітки успішно видалено!');
-      // Очищаємо мапу
+      alert('All markers deleted');
       markers.forEach(({ marker }) => map.removeLayer(marker));
       markers = [];
     } else {
-      alert('Помилка при видаленні міток');
+      alert('Error deleting all markers');
     }
   } catch (error) {
-    console.error('Error:', error);
-    alert('Помилка серверу');
+    console.error('Server error:', error);
+    alert('Server error');
   }
 });

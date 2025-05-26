@@ -1,39 +1,39 @@
-require('dotenv').config(); // Завантаження змінних з .env
+require('dotenv').config(); // Load environment variables
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const Location = require('./models/Location'); // Модель мітки
+const Location = require('./models/Location'); // Marker model
 
 const app = express();
 
-// CORS-конфігурація
+// CORS configuration
 app.use(cors({
   origin: 'http://127.0.0.1:5500',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type']
 }));
 
-app.use(express.json()); // Для обробки JSON
+app.use(express.json()); 
 
-// Підключення до MongoDB
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then(() => console.log('Підключено до MongoDB'))
-.catch(err => console.error('Помилка підключення до MongoDB:', err));
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('MongoDB connection error:', err));
 
-// 🔹 GET: отримати всі мітки
+// 🔹 GET: fetch all locations
 app.get('/api/locations', async (req, res) => {
   try {
     const locations = await Location.find();
     res.status(200).json(locations);
   } catch (err) {
-    res.status(500).json({ message: 'Помилка при завантаженні міток' });
+    res.status(500).json({ message: 'Error fetching locations' });
   }
 });
 
-// 🔹 POST: створити нову мітку
+// 🔹 POST: create a new location
 app.post('/api/locations', async (req, res) => {
   const { name, description, category, lat, lng } = req.body;
 
@@ -48,12 +48,12 @@ app.post('/api/locations', async (req, res) => {
     await newLocation.save();
     res.status(201).json(newLocation);
   } catch (error) {
-    console.error('❌ Помилка при створенні мітки:', error);
-    res.status(500).json({ message: 'Помилка при створенні мітки' });
+    console.error('❌ Error creating location:', error);
+    res.status(500).json({ message: 'Error creating location' });
   }
 });
 
-// 🔹 PUT: оновити мітку
+// 🔹 PUT: update a location
 app.put('/api/locations/:id', async (req, res) => {
   const { id } = req.params;
   const { name, description, category, lat, lng } = req.body;
@@ -71,45 +71,45 @@ app.put('/api/locations/:id', async (req, res) => {
     );
 
     if (!updated) {
-      return res.status(404).json({ message: 'Мітку не знайдено' });
+      return res.status(404).json({ message: 'Location not found' });
     }
 
     res.status(200).json(updated);
   } catch (error) {
-    console.error('❌ Помилка при оновленні мітки:', error);
-    res.status(500).json({ message: 'Помилка при оновленні мітки' });
+    console.error('❌ Error updating location:', error);
+    res.status(500).json({ message: 'Error updating location' });
   }
 });
 
-// 🔹 DELETE: видалити мітку
+// 🔹 DELETE: delete a specific location
 app.delete('/api/locations/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
     const deleted = await Location.findByIdAndDelete(id);
     if (!deleted) {
-      return res.status(404).json({ message: 'Мітку не знайдено' });
+      return res.status(404).json({ message: 'Location not found' });
     }
 
-    res.status(200).json({ message: 'Мітку успішно видалено' });
+    res.status(200).json({ message: 'Location successfully deleted' });
   } catch (error) {
-    console.error('❌ Помилка при видаленні мітки:', error);
-    res.status(500).json({ message: 'Помилка при видаленні мітки' });
+    console.error('❌ Error deleting location:', error);
+    res.status(500).json({ message: 'Error deleting location' });
+  }
+});
+
+// 🔹 DELETE: delete all locations
+app.delete('/api/locations', async (req, res) => {
+  try {
+    await Location.deleteMany({});
+    res.status(200).json({ message: 'All locations deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting locations' });
   }
 });
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Сервер працює на порту ${PORT}`);
-});
-
-// 🔹 DELETE: видалити всі мітки
-app.delete('/api/locations', async (req, res) => {
-  try {
-    await Location.deleteMany({});
-    res.status(200).json({ message: 'Усі мітки видалено' });
-  } catch (err) {
-    res.status(500).json({ message: 'Помилка при видаленні міток' });
-  }
+  console.log(`Server is running on port ${PORT}`);
 });
