@@ -1,12 +1,10 @@
 require('dotenv').config(); // Load environment variables
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const Location = require('./models/Location'); // Marker model
-
 const app = express();
+const mongoose = require('mongoose');
+const Location = require('./models/Location'); // Marker model
+const cors = require('cors');
 
-// CORS configuration
 app.use(cors({
   origin: 'http://127.0.0.1:5500',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -16,10 +14,8 @@ app.use(cors({
 app.use(express.json()); 
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGO_URI)
+
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
 
