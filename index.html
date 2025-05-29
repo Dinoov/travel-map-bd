@@ -5,28 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Мапа подорожей</title>
 
-  <!-- Шрифти -->
+  <!-- Підключення шрифтів з Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet" />
 
-  <!-- Leaflet CSS -->
+  <!-- Підключення стилів бібліотеки Leaflet для мап -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
-  <!-- Власні стилі -->
+  <!-- Підключення власних CSS стилів -->
   <link rel="stylesheet" href="css/reset.css" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <!-- Хедер сторінки з логотипом, заголовком і кнопкою очищення міток -->
   <header>
     <div class="head">
       <img src="pictures/free-icon-location-pin-5428978-removebg-preview.png" alt="Location Pin" />
       <h1>INTERACTIVE TRAVEL MAP</h1>
+      <!-- Посилання для очищення всіх маркерів з мапи -->
       <a href="#" id="clear">Delete <br />markers</a>
     </div>
   </header>
 
   <main>
+    <!-- Контейнер для мапи -->
     <div id="map"></div>
 
+    <!-- Форма для додавання мітки з назвою, описом та категорією -->
     <div class="description">
       <form id="markerForm">
         <label for="title">Title:</label>
@@ -42,19 +46,22 @@
           <option value="other">Other</option>
         </select><br /><br />
         
+        <!-- Приховані поля для збереження координат мітки -->
         <input type="hidden" id="latitude" name="latitude" />
         <input type="hidden" id="longitude" name="longitude" />
 
+        <!-- Кнопка для збереження мітки -->
         <button type="submit">Save</button>
       </form>
     </div>
 
+    <!-- Інструкція для користувача -->
     <p>Click on the desired location, fill in the column with the title and description.</p>
   </main>
 
-  <!-- Leaflet JS -->
+  <!-- Підключення бібліотеки Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <!-- Скрипт додатку -->
+  <!-- Підключення власного JS скрипту -->
   <script src="js/app.js"></script>
 </body>
 </html>

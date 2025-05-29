@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap');
 
+/* Загальні стилі для body */
 body {
   background-color: #003B46;
   font-family: 'Montserrat', sans-serif;
@@ -11,6 +12,7 @@ body {
   padding: 0;
 }
 
+/* Стилі для посилань */
 a {
   font-size: 40px;
   color: white;
@@ -23,17 +25,20 @@ a:hover {
   opacity: 0.5;
 }
 
+
 p {
   font-size: 20px;
   color: white;
   margin-bottom: 20px;
 }
 
+/* Заголовки */
 h1 {
   color: white;
   margin: 0;
 }
 
+/* Контейнер для карти */
 #map {
   height: 500px;
   width: 1240px;
@@ -41,6 +46,7 @@ h1 {
   margin: 30px auto;
 }
 
+/* Хедер сайту: фон, розміри, відступи та флекс для розміщення елементів */
 .head {
   background-color: #66A5AD;
   width: 1440px;
@@ -52,16 +58,18 @@ h1 {
   align-items: center;
 }
 
+/* Заголовок в хедері */
 .head h1 {
   font-size: 60px;
 }
 
+/* Логотип у хедері */
 .head img {
   height: 100px;
   width: 100px;
 }
 
-/* Popup (leaflet) */
+/* Стилі для кастомного popup Leaflet */
 .marker-popup {
   display: flex;
   flex-direction: column;
@@ -76,11 +84,13 @@ h1 {
   color: #003B46;
 }
 
+/* Параграфи всередині popup */
 .marker-popup p {
   color: #003B46;
   margin: 5px 0;
 }
 
+/* Категорія/тег у popup */
 .marker-popup .category {
   display: inline-block;
   margin-top: 8px;
@@ -91,6 +101,7 @@ h1 {
   color: #333;
 }
 
+/* Кнопки в popup */
 .marker-popup button {
   background-color: #66A5AD;
   color: white;
@@ -101,12 +112,11 @@ h1 {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 .marker-popup button:hover {
   background-color: #003B46;
 }
 
-/* Форма */
+/* Стилі для форми додавання міток */
 .description {
   background-color: #66A5AD;
   width: 1440px;
@@ -118,6 +128,7 @@ h1 {
   justify-content: space-between;
 }
 
+/* Форма в контейнері description */
 .description form {
   width: 100%;
   display: flex;
@@ -125,6 +136,7 @@ h1 {
   justify-content: space-between;
 }
 
+/* Підписи до полів форми */
 .description label {
   color: #003B46;
   font-weight: bold;
@@ -134,6 +146,7 @@ h1 {
   align-items: center;
 }
 
+/* Поля вводу */
 .description input,
 .description textarea,
 .description select {
@@ -150,6 +163,7 @@ h1 {
   max-height: 100px;
 }
 
+/* Кнопка форми */
 .description button {
   background-color: #66A5AD;
   color: white;
@@ -159,26 +173,25 @@ h1 {
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-left: 10px;
- 
 }
-
 .description button:hover {
   background-color: #003B46;
 }
 
+/* Контент спливаючого вікна leaflet */
 .leaflet-popup-content {
   max-width: 250px;
-  word-wrap: break-word; /* або */
+  word-wrap: break-word; /* підтримка переносу */
   overflow-wrap: break-word;
   white-space: normal;
 }
 
+/* Заголовок і опис в popup */
 .popup-title {
   max-width: 100%;
   overflow-wrap: break-word;
   white-space: normal;
 }
-
 .popup-description {
   max-width: 100%;
   overflow-wrap: break-word;
