@@ -1,50 +1,61 @@
-// Ініціалізація карти Leaflet з центром на Україну, масштаб 6
 const map = L.map('map').setView([48.3794, 31.1656], 6);
 
-// Додавання OpenStreetMap тайлів на карту з атрибуцією
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors',
 }).addTo(map);
 
-let lat, lng;              // Змінні для координат маркера
-let draftMarker = null;    // Тимчасовий маркер (чернетка)
-let markers = [];          // Масив для збереження всіх маркерів
+let lat, lng;
+let draftMarker = null;
+let markers = [];
+let allLocations = []; // для хранения всех загруженных локаций
 
-// Функція завантаження маркерів з бекенда
-async function loadMarkers() {
+async function loadMarkers(filterCategory = 'all') {
   try {
-    const res = await fetch('http://localhost:5000/api/locations');  // Отримання маркерів
+    const res = await fetch('http://localhost:5000/api/locations');
     const locations = await res.json();
+    allLocations = locations; // сохраняем все маркеры
 
-    // Видалення старих маркерів
     markers.forEach(({ marker }) => map.removeLayer(marker));
     markers = [];
 
-    // Додавання нових маркерів
-    locations.forEach((loc) => {
-      const marker = L.marker([loc.coordinates.lat, loc.coordinates.lng]).addTo(map);
+    const markerList = document.getElementById('markerList');
+    markerList.innerHTML = '';
 
-      // Спливаюче вікно з інформацією та кнопками
-      marker.bindPopup(`
-        <div class="marker-popup">
-          <b>${loc.name}</b>
-          <p>${loc.description}</p>
-          <span class="category">${loc.category}</span>
-          <button onclick="editMarker('${loc._id}', '${loc.name}', '${loc.description}', '${loc.category}', ${loc.coordinates.lat}, ${loc.coordinates.lng})">Edit</button>
-          <button onclick="deleteMarker('${loc._id}')">Delete</button>
-        </div>
-      `);
+    locations
+      .filter(loc => filterCategory === 'all' || loc.category === filterCategory)
+      .forEach(loc => {
+        const marker = L.marker([loc.coordinates.lat, loc.coordinates.lng]).addTo(map);
 
-      markers.push({ id: loc._id, marker });
-    });
-  } catch (error) {
-    console.error('Error loading markers:', error);
+        marker.bindPopup(`
+          <div class="marker-popup">
+            <b>${loc.name}</b>
+            <p>${loc.description}</p>
+            <span class="category">${loc.category}</span>
+            <button onclick="editMarker('${loc._id}', '${loc.name}', '${loc.description}', '${loc.category}', ${loc.coordinates.lat}, ${loc.coordinates.lng})">Edit</button>
+            <button onclick="deleteMarker('${loc._id}')">Delete</button>
+          </div>
+        `);
+
+        markers.push({ id: loc._id, marker });
+
+        const li = document.createElement('li');
+        li.textContent = loc.name;
+        li.style.cursor = 'pointer';
+        li.addEventListener('click', () => {
+          map.setView([loc.coordinates.lat, loc.coordinates.lng], 12);
+          marker.openPopup();
+        });
+        markerList.appendChild(li);
+      });
+  } catch (err) {
+    console.error('Error loading markers:', err);
   }
 }
-loadMarkers();
 
-// Обробка кліку на мапу — створення чернетки маркера
-map.on('click', (e) => {
+loadMarkers(document.getElementById('categoryFilter').value);
+document.getElementById('categoryFilter').addEventListener('change', e => loadMarkers(e.target.value));
+
+map.on('click', e => {
   lat = e.latlng.lat;
   lng = e.latlng.lng;
 
@@ -60,7 +71,6 @@ map.on('click', (e) => {
   draftMarker.on('popupclose', () => removeDraft());
 });
 
-// Видалення чернетки з карти
 function removeDraft() {
   if (draftMarker) {
     map.removeLayer(draftMarker);
@@ -69,28 +79,23 @@ function removeDraft() {
   }
 }
 
-// Видалення маркера за ID
 async function deleteMarker(id) {
   try {
     const res = await fetch(`http://localhost:5000/api/locations/${id}`, { method: 'DELETE' });
 
     if (res.ok) {
-      const obj = markers.find((m) => m.id === id);
-      if (obj) {
-        map.removeLayer(obj.marker);
-        markers = markers.filter((m) => m.id !== id);
-      }
       alert('Marker removed');
+      const currentFilter = document.getElementById('categoryFilter').value;
+      loadMarkers(currentFilter);
     } else {
       alert('Error deleting marker');
     }
-  } catch (error) {
-    console.error('Server error:', error);
+  } catch (err) {
+    console.error('Server error:', err);
     alert('Server error');
   }
 }
 
-// Редагування маркера — заповнює форму і створює чернетку на мапі
 function editMarker(id, name, description, category, latSel, lngSel) {
   document.getElementById('title').value = name;
   document.getElementById('description').value = description;
@@ -110,26 +115,43 @@ function editMarker(id, name, description, category, latSel, lngSel) {
   draftMarker.on('popupclose', () => removeDraft());
 }
 
-// Збереження маркера (створення нового або оновлення існуючого)
-document.getElementById('markerForm').addEventListener('submit', async (e) => {
+document.getElementById('markerForm').addEventListener('submit', async e => {
   e.preventDefault();
 
   if (lat == null || lng == null) {
-    alert('Select a point on the map');
+    alert('Выберите точку на карте');
+    return;
+  }
+
+  const name = document.getElementById('title').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const category = document.getElementById('category').value.trim();
+
+  const form = document.getElementById('markerForm');
+  const id = form.dataset.id;
+
+  // Проверка на дубликаты по названию
+  const duplicate = allLocations.find(loc =>
+    loc.name === name && (!id || loc._id !== id)
+  );
+
+  if (duplicate) {
+    alert('Метка с таким названием уже существует!');
     return;
   }
 
   const payload = {
-    name: document.getElementById('title').value,
-    description: document.getElementById('description').value,
-    category: document.getElementById('category').value,
+    name,
+    description,
+    category,
     lat,
     lng,
   };
 
-  const form = document.getElementById('markerForm');
-  const id = form.dataset.id;
-  const url = id ? `http://localhost:5000/api/locations/${id}` : 'http://localhost:5000/api/locations';
+  const url = id
+    ? `http://localhost:5000/api/locations/${id}`
+    : 'http://localhost:5000/api/locations';
+
   const method = id ? 'PUT' : 'POST';
 
   try {
@@ -140,24 +162,25 @@ document.getElementById('markerForm').addEventListener('submit', async (e) => {
     });
 
     if (res.ok) {
-      alert(id ? 'Marker updated' : 'Marker added');
+      alert(id ? 'Метка обновлена' : 'Метка добавлена');
       form.reset();
       delete form.dataset.id;
       removeDraft();
-      loadMarkers();
+      const currentFilter = document.getElementById('categoryFilter').value;
+      await loadMarkers(currentFilter);
     } else {
-      alert('Error saving marker');
+      alert('Ошибка при сохранении метки');
     }
-  } catch (error) {
-    console.error('Server error:', error);
-    alert('Server error');
+
+  } catch (err) {
+    console.error('Ошибка сервера:', err);
+    alert('Ошибка сервера');
   }
 });
 
-// Видалення всіх маркерів з карти
-document.getElementById('clear').addEventListener('click', async (e) => {
-  e.preventDefault();
 
+document.getElementById('clear').addEventListener('click', async e => {
+  e.preventDefault();
   if (!confirm('Delete all markers?')) return;
 
   try {
@@ -167,11 +190,13 @@ document.getElementById('clear').addEventListener('click', async (e) => {
       alert('All markers removed');
       markers.forEach(({ marker }) => map.removeLayer(marker));
       markers = [];
+      allLocations = [];
+      document.getElementById('markerList').innerHTML = '';
     } else {
       alert('Error deleting markers');
     }
-  } catch (error) {
-    console.error('Server error:', error);
+  } catch (err) {
+    console.error('Server error:', err);
     alert('Server error');
   }
 });

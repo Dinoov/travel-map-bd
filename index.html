@@ -27,8 +27,25 @@
   </header>
 
   <main>
-    <!-- Контейнер для мапи -->
-    <div id="map"></div>
+   <div class="map-filter-container">
+      <div id="map"></div>
+
+      <div class="side-panel">
+        <div class="filter">
+          <label for="categoryFilter">Filter:</label>
+          <select id="categoryFilter">
+            <option value="all">Show all</option>
+            <option value="Visited">Visited</option>
+            <option value="Plan to visit">Plan to visit</option>
+          </select>
+        </div>
+
+        <div class="marker-list">
+          <h3>All markers</h3>
+          <ul id="markerList"></ul>
+        </div>
+      </div>
+    </div>
 
     <!-- Форма для додавання мітки з назвою, описом та категорією -->
     <div class="description">
@@ -41,10 +58,10 @@
 
         <label for="category">Category:</label>
         <select id="category" name="category">
-          <option value="nature">Nature</option>
-          <option value="architecture">Architecture</option>
-          <option value="other">Other</option>
-        </select><br /><br />
+        <option value="Visited">Visited</option>
+        <option value="Plan to visit">Plan to visit</option>
+      </select>
+          <br /><br />
         
         <!-- Приховані поля для збереження координат мітки -->
         <input type="hidden" id="latitude" name="latitude" />
