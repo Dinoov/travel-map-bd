@@ -4,16 +4,34 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors',
 }).addTo(map);
 
+const defaultIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  shadowSize: [41, 41]
+});
+
+const greenIcon = L.icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  shadowSize: [41, 41]
+});
+
 let lat, lng;
 let draftMarker = null;
 let markers = [];
-let allLocations = []; // для хранения всех загруженных локаций
+let allLocations = [];
 
 async function loadMarkers(filterCategory = 'all') {
   try {
     const res = await fetch('http://localhost:5000/api/locations');
     const locations = await res.json();
-    allLocations = locations; // сохраняем все маркеры
+    allLocations = locations;
 
     markers.forEach(({ marker }) => map.removeLayer(marker));
     markers = [];
@@ -24,7 +42,9 @@ async function loadMarkers(filterCategory = 'all') {
     locations
       .filter(loc => filterCategory === 'all' || loc.category === filterCategory)
       .forEach(loc => {
-        const marker = L.marker([loc.coordinates.lat, loc.coordinates.lng]).addTo(map);
+        const icon = loc.category === 'Plan to visit' ? greenIcon : defaultIcon;
+
+        const marker = L.marker([loc.coordinates.lat, loc.coordinates.lng], { icon }).addTo(map);
 
         marker.bindPopup(`
           <div class="marker-popup">
@@ -61,7 +81,12 @@ map.on('click', e => {
 
   if (draftMarker) map.removeLayer(draftMarker);
 
-  draftMarker = L.marker([lat, lng], { opacity: 0.6 }).addTo(map).bindPopup(`
+  // Иконка для draft маркера зависит от выбранной категории в форме
+  const categorySelect = document.getElementById('category');
+  const selectedCategory = categorySelect.value;
+  const icon = selectedCategory === 'Plan to visit' ? greenIcon : defaultIcon;
+
+  draftMarker = L.marker([lat, lng], { opacity: 0.6, icon }).addTo(map).bindPopup(`
     <div class="marker-popup">
       <b>New marker</b><br />
       Fill out the form and click "Save".
@@ -69,6 +94,13 @@ map.on('click', e => {
   `).openPopup();
 
   draftMarker.on('popupclose', () => removeDraft());
+});
+
+document.getElementById('category').addEventListener('change', () => {
+  if (draftMarker) {
+    const icon = document.getElementById('category').value === 'Plan to visit' ? greenIcon : defaultIcon;
+    draftMarker.setIcon(icon);
+  }
 });
 
 function removeDraft() {
@@ -106,7 +138,10 @@ function editMarker(id, name, description, category, latSel, lngSel) {
   lng = lngSel;
 
   if (draftMarker) map.removeLayer(draftMarker);
-  draftMarker = L.marker([lat, lng], { opacity: 0.6 }).addTo(map).bindPopup(`
+
+  const icon = category === 'Plan to visit' ? greenIcon : defaultIcon;
+
+  draftMarker = L.marker([lat, lng], { opacity: 0.6, icon }).addTo(map).bindPopup(`
     <div class="marker-popup">
       <b>Editing a marker</b>
     </div>
@@ -119,7 +154,7 @@ document.getElementById('markerForm').addEventListener('submit', async e => {
   e.preventDefault();
 
   if (lat == null || lng == null) {
-    alert('Выберите точку на карте');
+    alert('Please select a point on the map');
     return;
   }
 
@@ -130,13 +165,13 @@ document.getElementById('markerForm').addEventListener('submit', async e => {
   const form = document.getElementById('markerForm');
   const id = form.dataset.id;
 
-  // Проверка на дубликаты по названию
+  // Проверка на дубликаты по имени
   const duplicate = allLocations.find(loc =>
     loc.name === name && (!id || loc._id !== id)
   );
 
   if (duplicate) {
-    alert('Метка с таким названием уже существует!');
+    alert('A marker with this name already exists!');
     return;
   }
 
@@ -162,22 +197,21 @@ document.getElementById('markerForm').addEventListener('submit', async e => {
     });
 
     if (res.ok) {
-      alert(id ? 'Метка обновлена' : 'Метка добавлена');
+      alert(id ? 'Marker updated' : 'Marker added');
       form.reset();
       delete form.dataset.id;
       removeDraft();
       const currentFilter = document.getElementById('categoryFilter').value;
       await loadMarkers(currentFilter);
     } else {
-      alert('Ошибка при сохранении метки');
+      alert('Error saving marker');
     }
 
   } catch (err) {
-    console.error('Ошибка сервера:', err);
-    alert('Ошибка сервера');
+    console.error('Server error:', err);
+    alert('Server error');
   }
 });
-
 
 document.getElementById('clear').addEventListener('click', async e => {
   e.preventDefault();
