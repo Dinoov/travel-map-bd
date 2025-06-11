@@ -1,37 +1,38 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk"> <!-- Вказує мову сторінки — українська -->
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Мапа подорожей</title>
-
-  <!-- Підключення шрифтів з Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet" />
-
-  <!-- Підключення стилів бібліотеки Leaflet для мап -->
+  <meta charset="UTF-8" /> <!-- Кодування символів — UTF-8 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Адаптивність для мобільних пристроїв -->
+  <title>Мапа подорожей</title> <!-- Назва сторінки у вкладці браузера -->
+  <!-- Підключення стилів бібліотеки Leaflet для відображення мапи -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-
-  <!-- Підключення власних CSS стилів -->
+  <!-- Стилі для групування міток (кластеризація) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <!-- Підключення власних CSS-файлів для скидання стилів і кастомного оформлення -->
   <link rel="stylesheet" href="css/reset.css" />
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/adaptive.css" />
 </head>
 <body>
-  <!-- Хедер сторінки з логотипом, заголовком і кнопкою очищення міток -->
+  <!-- Хедер сторінки: містить логотип, назву мапи та кнопку очищення міток -->
   <header>
     <div class="head">
+      <!-- Логотип -->
       <img src="pictures/free-icon-location-pin-5428978-removebg-preview.png" alt="Location Pin" />
       <h1>INTERACTIVE TRAVEL MAP</h1>
-      <!-- Посилання для очищення всіх маркерів з мапи -->
+      <!-- Кнопка для очищення всіх маркерів -->
       <a href="#" id="clear">Delete <br />markers</a>
     </div>
   </header>
 
   <main>
-   <div class="map-filter-container">
+    <!-- Контейнер з мапою та панеллю фільтрів -->
+    <div class="map-filter-container">
+      <!-- Контейнер для самої мапи -->
       <div id="map"></div>
-
+      <!-- Бокова панель з фільтрами та списком міток -->
       <div class="side-panel">
+        <!-- Фільтр міток за категорією -->
         <div class="filter">
           <label for="categoryFilter">Filter:</label>
           <select id="categoryFilter">
@@ -41,6 +42,7 @@
           </select>
         </div>
 
+        <!-- Список усіх створених міток -->
         <div class="marker-list">
           <h3>All markers</h3>
           <ul id="markerList"></ul>
@@ -48,23 +50,25 @@
       </div>
     </div>
 
-    <!-- Форма для додавання мітки з назвою, описом та категорією -->
+    <!-- Форма додавання нової мітки -->
     <div class="description">
       <form id="markerForm">
+        <!-- Поле для введення назви мітки -->
         <label for="title">Title:</label>
-        <textarea id="title" name="title" required></textarea><br /><br />
+        <textarea id="title" name="title" required></textarea>
 
+        <!-- Поле для введення опису мітки -->
         <label for="description">Description:</label>
-        <textarea id="description" name="description" required></textarea><br /><br />
+        <textarea id="description" name="description" required></textarea>
 
+        <!-- Вибір категорії мітки -->
         <label for="category">Category:</label>
         <select id="category" name="category">
-        <option value="Visited">Visited</option>
-        <option value="Plan to visit">Plan to visit</option>
-      </select>
-          <br /><br />
-        
-        <!-- Приховані поля для збереження координат мітки -->
+          <option value="Visited">Visited</option>
+          <option value="Plan to visit">Plan to visit</option>
+        </select>
+
+        <!-- Приховані поля, у які автоматично підставляються координати натискання на мапі -->
         <input type="hidden" id="latitude" name="latitude" />
         <input type="hidden" id="longitude" name="longitude" />
 
@@ -73,13 +77,17 @@
       </form>
     </div>
 
-    <!-- Інструкція для користувача -->
+    <!-- Коротка інструкція для користувача -->
     <p>Click on the desired location, fill in the column with the title and description.</p>
   </main>
 
-  <!-- Підключення бібліотеки Leaflet JS -->
+  <!-- Підключення бібліотеки Leaflet для роботи з мапою -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <!-- Підключення власного JS скрипту -->
+
+  <!-- Підключення бібліотеки для кластеризації маркерів -->
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+  <!-- Підключення власного скрипту, де реалізована логіка додавання, збереження і відображення міток -->
   <script src="js/app.js"></script>
 </body>
 </html>

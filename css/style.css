@@ -1,33 +1,34 @@
+/* Імпорт шрифтів з Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap');
 
-/* Загальні стилі для body */
+/* Загальні стилі для сторінки*/
 body {
-  background-color: #003B46;
-  font-family: 'Montserrat', sans-serif;
-  display: flex;
+  background-color: #003B46; 
+  font-family: 'Montserrat', sans-serif; 
+  display: flex; 
   flex-direction: column;
-  align-items: center;
+  align-items: center; 
   text-align: center;
   margin: 0;
   padding: 0;
 }
 
-/* Стилі для посилань */
+/* Стилізація всіх посилань */
 a {
   font-size: 40px;
   color: white;
   text-decoration: none;
   cursor: pointer;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease; 
 }
 
 a:hover {
-  opacity: 0.5;
+  opacity: 0.5; /* Ефект наведення */
 }
 
-
+/* Параграфи */
 p {
-  font-size: 20px;
+  font-size: 18px;
   color: white;
   margin-bottom: 20px;
 }
@@ -38,43 +39,35 @@ h1 {
   margin: 0;
 }
 
-/* Контейнер для карти */
-#map {
-  height: 500px;
-  width: 1240px;
-  border-radius: 20px;
-  margin: 30px auto;
-}
-
-/* Хедер сайту: фон, розміри, відступи та флекс для розміщення елементів */
+/* Хедер сайту */
 .head {
-  background-color: #66A5AD;
+  background-color: #66A5AD; /* Світлий бірюзовий */
   width: 1440px;
   height: 135px;
   margin: 15px 0;
-  border-radius: 20px;
+  border-radius: 20px; /* Закруглені краї */
   display: flex;
-  justify-content: space-around;
+  justify-content: space-around; /* Рівномірний розподіл елементів */
   align-items: center;
 }
 
-/* Заголовок в хедері */
+/* Заголовок у хедері */
 .head h1 {
   font-size: 60px;
 }
 
-/* Логотип у хедері */
+/* Логотип */
 .head img {
   height: 100px;
   width: 100px;
 }
 
-/* Стилі для кастомного popup Leaflet */
+/* Popup стилі (вікно маркеру) */
 .marker-popup {
   display: flex;
   flex-direction: column;
   font-family: 'Montserrat', sans-serif;
-  background-color: #f9f9f9;
+  background-color: #f9f9f9; 
   padding: 10px;
   border: 2px solid #66A5AD;
   border-radius: 10px;
@@ -84,20 +77,19 @@ h1 {
   color: #003B46;
 }
 
-/* Параграфи всередині popup */
 .marker-popup p {
   color: #003B46;
   margin: 5px 0;
 }
 
-/* Категорія/тег у popup */
+/* Категорія у popup */
 .marker-popup .category {
   display: inline-block;
   margin-top: 8px;
   padding: 4px 8px;
   background-color: #e0e0e0;
   border-radius: 4px;
-  font-size: 0.85em;
+  font-size: 12px;
   color: #333;
 }
 
@@ -112,11 +104,12 @@ h1 {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+
 .marker-popup button:hover {
   background-color: #003B46;
 }
 
-/* Стилі для форми додавання міток */
+/* Блок форми додавання мітки */
 .description {
   background-color: #66A5AD;
   width: 1440px;
@@ -128,7 +121,7 @@ h1 {
   justify-content: space-between;
 }
 
-/* Форма в контейнері description */
+/* Структура форми */
 .description form {
   width: 100%;
   display: flex;
@@ -136,11 +129,11 @@ h1 {
   justify-content: space-between;
 }
 
-/* Підписи до полів форми */
+/* Підписи до полів */
 .description label {
   color: #003B46;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 18px;
   margin-right: 10px;
   display: flex;
   align-items: center;
@@ -153,7 +146,7 @@ h1 {
   width: 180px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-family: inherit;
+  font-family: 'Montserrat', sans-serif;
   padding: 5px;
   resize: none;
 }
@@ -163,7 +156,7 @@ h1 {
   max-height: 100px;
 }
 
-/* Кнопка форми */
+/* Кнопка збереження */
 .description button {
   background-color: #66A5AD;
   color: white;
@@ -174,66 +167,60 @@ h1 {
   transition: background-color 0.3s ease;
   margin-left: 10px;
 }
+
 .description button:hover {
   background-color: #003B46;
 }
 
-/* Контент спливаючого вікна leaflet */
+/* Вміст leaflet popup */
 .leaflet-popup-content {
   max-width: 250px;
-  word-wrap: break-word; /* підтримка переносу */
+  word-wrap: break-word; 
   overflow-wrap: break-word;
   white-space: normal;
 }
 
-/* Заголовок і опис в popup */
-.popup-title {
-  max-width: 100%;
-  overflow-wrap: break-word;
-  white-space: normal;
-}
+/* Заголовок і опис у popup */
+.popup-title,
 .popup-description {
   max-width: 100%;
   overflow-wrap: break-word;
   white-space: normal;
 }
 
-
+/* Розмітка карти та бокової панелі */
 .map-filter-container {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 30px;
+  gap: 30px; 
   width: 1440px;
   margin: 30px auto 0;
 }
 
-/* Убираем фиксированную ширину карты, чтобы она адаптировалась */
+/* Карта */
 #map {
   height: 500px;
-  width: 1100px; /* чуть уже, чтобы фильтр помещался справа */
+  width: 1100px;
   border-radius: 20px;
-  margin: 0; /* убираем margin сверху и снизу */
+  margin: 0;
 }
 
-/* Фильтр теперь вертикальный и справа *//* Фильтр теперь вертикальный и справа *//* Фильтр теперь вертикальный и справа *//* Фильтр теперь вертикальный и справа */
-
-/* Фильтр теперь вертикальный и справа */
+/* Блок фільтру (селектор категорій) */
 .filter {
   background-color: #66A5AD;
-  width: 300px; /* фиксированная ширина для фильтра */
+  width: 300px;
   border-radius: 20px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  font-family: 'Montserrat', sans-serif;
 }
 
 .filter label {
   color: #003B46;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 18px;
   margin-bottom: 10px;
 }
 
@@ -241,12 +228,11 @@ h1 {
   width: 100%;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-family: inherit;
   padding: 5px;
   cursor: pointer;
 }
 
-
+/* Обгортка для фільтру та списку міток */
 .filter-and-list {
   background-color: #66A5AD;
   width: 300px;
@@ -254,10 +240,9 @@ h1 {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  font-family: 'Montserrat', sans-serif;
 }
 
-/* Обёртка для фильтра и списка маркеров */
+/* Панель праворуч з фільтром та списком */
 .side-panel {
   display: flex;
   flex-direction: column;
@@ -265,21 +250,16 @@ h1 {
   width: 300px;
 }
 
-/* Стили для marker-list похожие на filter */
+/* Список міток */
 .marker-list {
   background-color: #66A5AD;
   border-radius: 20px;
   padding: 20px;
-  font-family: 'Montserrat', sans-serif;
   color: #003B46;
   max-height: 380px;
-  
-  overflow-y: scroll; /* включаем вертикальную прокрутку */
-  
-  /* Скрываем скроллбар для Firefox */
-  scrollbar-width: none;
-  /* Скрываем скроллбар для IE, Edge */
-  -ms-overflow-style: none;
+  overflow-y: scroll;
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
 }
 
 .marker-list h3 {
@@ -296,7 +276,7 @@ h1 {
 
 .marker-list li {
   margin-bottom: 10px;
-  background-color: #e0e0e0;
+  background-color: #ffffff;
   padding: 6px 10px;
   border-radius: 6px;
   color: #333;

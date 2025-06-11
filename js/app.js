@@ -1,39 +1,49 @@
+// Ініціалізація карти з центром на Україні та масштабом 6
 const map = L.map('map').setView([48.3794, 31.1656], 6);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors',
 }).addTo(map);
 
+// Ініціалізація групи для кластеризації маркерів
+const markerClusterGroup = L.markerClusterGroup();
+map.addLayer(markerClusterGroup);
+
+// Стандартна іконка маркера
 const defaultIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-  shadowSize: [41, 41]
+  shadowSize: [41, 41],
 });
 
+// Зелена іконка для категорії "Plan to visit"
 const greenIcon = L.icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-  shadowSize: [41, 41]
+  shadowSize: [41, 41],
 });
 
+// Змінні для координат та маркерів
 let lat, lng;
-let draftMarker = null;
-let markers = [];
-let allLocations = [];
+let draftMarker = null;  // Чернетковий маркер
+let markers = [];        // Масив маркерів на мапі
+let allLocations = [];   // Усі локації з бази
 
+// Завантаження маркерів з сервера, з фільтром за категорією
 async function loadMarkers(filterCategory = 'all') {
   try {
     const res = await fetch('http://localhost:5000/api/locations');
     const locations = await res.json();
     allLocations = locations;
 
-    markers.forEach(({ marker }) => map.removeLayer(marker));
+    // Очистити попередні маркери
+    markerClusterGroup.clearLayers();
     markers = [];
 
     const markerList = document.getElementById('markerList');
@@ -44,8 +54,10 @@ async function loadMarkers(filterCategory = 'all') {
       .forEach(loc => {
         const icon = loc.category === 'Plan to visit' ? greenIcon : defaultIcon;
 
-        const marker = L.marker([loc.coordinates.lat, loc.coordinates.lng], { icon }).addTo(map);
+        // Створення маркера
+        const marker = L.marker([loc.coordinates.lat, loc.coordinates.lng], { icon });
 
+        // Прив’язка попапу з інформацією та кнопками редагування/видалення
         marker.bindPopup(`
           <div class="marker-popup">
             <b>${loc.name}</b>
@@ -56,8 +68,10 @@ async function loadMarkers(filterCategory = 'all') {
           </div>
         `);
 
+        markerClusterGroup.addLayer(marker);
         markers.push({ id: loc._id, marker });
 
+        // Додавання елемента у список маркерів збоку
         const li = document.createElement('li');
         li.textContent = loc.name;
         li.style.cursor = 'pointer';
@@ -65,6 +79,7 @@ async function loadMarkers(filterCategory = 'all') {
           map.setView([loc.coordinates.lat, loc.coordinates.lng], 12);
           marker.openPopup();
         });
+
         markerList.appendChild(li);
       });
   } catch (err) {
@@ -72,30 +87,40 @@ async function loadMarkers(filterCategory = 'all') {
   }
 }
 
+// Завантажити маркери при старті сторінки
 loadMarkers(document.getElementById('categoryFilter').value);
-document.getElementById('categoryFilter').addEventListener('change', e => loadMarkers(e.target.value));
 
+// Слухач події для зміни категорії фільтра
+document.getElementById('categoryFilter').addEventListener('change', e =>
+  loadMarkers(e.target.value)
+);
+
+// Обробка кліку по мапі — додавання нового маркера
 map.on('click', e => {
   lat = e.latlng.lat;
   lng = e.latlng.lng;
 
+  // Видалення попереднього чернеткового маркера
   if (draftMarker) map.removeLayer(draftMarker);
 
-  // Иконка для draft маркера зависит от выбранной категории в форме
-  const categorySelect = document.getElementById('category');
-  const selectedCategory = categorySelect.value;
+  const selectedCategory = document.getElementById('category').value;
   const icon = selectedCategory === 'Plan to visit' ? greenIcon : defaultIcon;
 
-  draftMarker = L.marker([lat, lng], { opacity: 0.6, icon }).addTo(map).bindPopup(`
-    <div class="marker-popup">
-      <b>New marker</b><br />
-      Fill out the form and click "Save".
-    </div>
-  `).openPopup();
+  // Додавання нового тимчасового маркера
+  draftMarker = L.marker([lat, lng], { opacity: 0.6, icon })
+    .addTo(map)
+    .bindPopup(`
+      <div class="marker-popup">
+        <b>New marker</b><br />
+        Fill out the form and click "Save".
+      </div>
+    `).openPopup();
 
+  // Видалення чернетки після закриття попапу
   draftMarker.on('popupclose', () => removeDraft());
 });
 
+// Зміна іконки чернеткового маркера при зміні категорії
 document.getElementById('category').addEventListener('change', () => {
   if (draftMarker) {
     const icon = document.getElementById('category').value === 'Plan to visit' ? greenIcon : defaultIcon;
@@ -103,6 +128,7 @@ document.getElementById('category').addEventListener('change', () => {
   }
 });
 
+// Видалення тимчасового маркера з карти
 function removeDraft() {
   if (draftMarker) {
     map.removeLayer(draftMarker);
@@ -111,14 +137,14 @@ function removeDraft() {
   }
 }
 
+// Видалення окремого маркера
 async function deleteMarker(id) {
   try {
     const res = await fetch(`http://localhost:5000/api/locations/${id}`, { method: 'DELETE' });
 
     if (res.ok) {
       alert('Marker removed');
-      const currentFilter = document.getElementById('categoryFilter').value;
-      loadMarkers(currentFilter);
+      loadMarkers(document.getElementById('categoryFilter').value);
     } else {
       alert('Error deleting marker');
     }
@@ -128,6 +154,7 @@ async function deleteMarker(id) {
   }
 }
 
+// Редагування маркера — заповнення форми поточними даними
 function editMarker(id, name, description, category, latSel, lngSel) {
   document.getElementById('title').value = name;
   document.getElementById('description').value = description;
@@ -141,15 +168,15 @@ function editMarker(id, name, description, category, latSel, lngSel) {
 
   const icon = category === 'Plan to visit' ? greenIcon : defaultIcon;
 
-  draftMarker = L.marker([lat, lng], { opacity: 0.6, icon }).addTo(map).bindPopup(`
-    <div class="marker-popup">
-      <b>Editing a marker</b>
-    </div>
-  `).openPopup();
+  draftMarker = L.marker([lat, lng], { opacity: 0.6, icon })
+    .addTo(map)
+    .bindPopup(`<div class="marker-popup"><b>Editing a marker</b></div>`)
+    .openPopup();
 
   draftMarker.on('popupclose', () => removeDraft());
 }
 
+// Обробка надсилання форми (додавання або редагування маркера)
 document.getElementById('markerForm').addEventListener('submit', async e => {
   e.preventDefault();
 
@@ -165,7 +192,7 @@ document.getElementById('markerForm').addEventListener('submit', async e => {
   const form = document.getElementById('markerForm');
   const id = form.dataset.id;
 
-  // Проверка на дубликаты по имени
+  // Перевірка на дублікати
   const duplicate = allLocations.find(loc =>
     loc.name === name && (!id || loc._id !== id)
   );
@@ -175,18 +202,10 @@ document.getElementById('markerForm').addEventListener('submit', async e => {
     return;
   }
 
-  const payload = {
-    name,
-    description,
-    category,
-    lat,
-    lng,
-  };
-
+  const payload = { name, description, category, lat, lng };
   const url = id
     ? `http://localhost:5000/api/locations/${id}`
     : 'http://localhost:5000/api/locations';
-
   const method = id ? 'PUT' : 'POST';
 
   try {
@@ -201,20 +220,25 @@ document.getElementById('markerForm').addEventListener('submit', async e => {
       form.reset();
       delete form.dataset.id;
       removeDraft();
-      const currentFilter = document.getElementById('categoryFilter').value;
-      await loadMarkers(currentFilter);
+      loadMarkers(document.getElementById('categoryFilter').value);
     } else {
       alert('Error saving marker');
     }
-
   } catch (err) {
     console.error('Server error:', err);
     alert('Server error');
   }
 });
 
+// Видалення усіх маркерів з карти та бази
 document.getElementById('clear').addEventListener('click', async e => {
   e.preventDefault();
+
+  if (markers.length === 0) {
+    alert('There are no markers to delete.');
+    return;
+  }
+
   if (!confirm('Delete all markers?')) return;
 
   try {
